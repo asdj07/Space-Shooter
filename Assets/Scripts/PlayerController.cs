@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [System.Serializable]
 public class Boundary
@@ -9,7 +10,7 @@ public class Boundary
 
 public class PlayerController : MonoBehaviour {
 
-    public float speed;
+    private float speed;
 
     public float tilt;
 
@@ -19,12 +20,32 @@ public class PlayerController : MonoBehaviour {
     public float fireRate;    //控制子弹发射的间隔时间
     public GameObject shot;    //保存我们发射的子弹Prefab
     public Transform shotSqawn;   //保存子弹的发射点
-
+    public socket skt;
 
     // Use this for initialization
     void Start () {
-	
-	}
+        //csvController加载csv文件，单例模式，这个类只有一个对象，这个对象只能加载一个csv文件
+        //csvController.GetInstance().loadFile(Application.dataPath + "/Res", "csvTest.csv");
+        //根据索引读取csvController中的list（csv文件的内容）数据
+        //speed = csvController.GetInstance().getInt(1, 2);
+        //Debug.Log("Player speed is " + csvController.GetInstance().getInt(1,2));
+        
+        
+        //从java后端获取玩家参数
+        //speed,fireRate
+        skt = socket.GetInstance();
+        //返回数据 应为  speed-fireRate
+        String msg = skt.SendMessage("req002");
+        Debug.Log("request msg:" + "req002");
+        Debug.Log("response msg:" + msg);
+        if (msg!=null && msg.Split(skt.getSp2()).Length>1)
+        {
+            speed = float.Parse(msg.Split(skt.getSp2())[0]);
+            fireRate = float.Parse(msg.Split(skt.getSp2())[1]);
+            Debug.Log("speed:" + speed + "   firerete:" + fireRate);
+        }
+        
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -61,7 +82,7 @@ public class PlayerController : MonoBehaviour {
             Mathf.Clamp(GetComponent<Rigidbody>().position.z, boundary.zMin, boundary.zMax)
             );
 
-        Debug.Log(boundary.xMin + "::" + boundary.xMax);
+        //Debug.Log(boundary.xMin + "::" + boundary.xMax);
     }
 
 
